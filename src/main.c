@@ -1,19 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "shell_loop.h"
+#include "historial.h"
+#include <signal.h>
 
 int main(int argc, char *argv[]){
 
+    // - Manejo de señales
+    signal(SIGSTOP, SIG_IGN);
+
     // Por hacer
     // - Tabla de Jobs
-    // - Historial
-    // - Manejo de señales
+    Historial* historial = crear_historial();
+    
+    shell_loop(historial);
 
-    shell_loop();
+    liberar_historial(historial, free);
 
     // Por hacer
-    // - Guardar historial
-    // - Liberar memoria
+    // - Liberar memoria (Jobs)
 
     return 0;
 }

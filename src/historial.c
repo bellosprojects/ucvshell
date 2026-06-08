@@ -3,13 +3,18 @@
 #include <string.h>
 #include "dequeue.h"
 #include "historial.h"
-
-const char* HISTORIAL_FILE = ".ucvsh_history";
+#define COMMAND_SIZE 256
+const char* HISTORIAL_FILE = "../historial.txt";
 
 typedef struct Historial {
     Dequeue* dq;
     Nodo* cursor_actual;
 } Historial;
+
+typedef struct linea{
+    int num;
+    char* comando;
+} linea;
 
 void cargar_historial(Dequeue* dq);
 
@@ -30,8 +35,10 @@ void actualizar_valor(Historial* historial, char* nuevo_valor){
     // Liberar el valor anterior para evitar fugas de memoria
     free(historial->cursor_actual->dato);
     
-    // Asignar el nuevo valor (duplicado para seguridad)
-    historial->cursor_actual->dato = strdup(nuevo_valor);
+    linea * nueva_linea = (linea*)malloc(sizeof(linea));
+    nueva_linea->num = ((linea*)historial->cursor_actual->dato)->num; // Mantener el mismo número
+    nueva_linea->comando = strdup(nuevo_valor); // Duplicar el nuevo comando
+    historial->cursor_actual->dato = nueva_linea;
 }
 
 void agregar_historial(Historial* historial, char* dato) {
@@ -42,14 +49,17 @@ void agregar_historial(Historial* historial, char* dato) {
     if (ultimo && strcmp(ultimo, dato) == 0) return;
     
     // IMPORTANTE: Duplicar la memoria porque 'linea' en shell_loop es local
-    char* copia = strdup(dato);
-    push_front(historial->dq, copia);
+    linea * nueva_linea = (linea*)malloc(sizeof(linea));
+    nueva_linea->num = getSize(historial->dq) + 1; // Asignar número secuencial
+    nueva_linea->comando = strdup(dato); // Duplicar el comando para evitar problemas de memoria
+    //char* copia = strdup(dato);
+    push_front(historial->dq, nueva_linea);
     
     historial->cursor_actual = NULL; // Resetear navegación
 
     FILE* f = fopen(HISTORIAL_FILE, "a");
     if (f) {
-        fprintf(f, "%s\n", copia);
+        fprintf(f, "%s\n", nueva_linea->comando);
         fclose(f);
     }
 }
@@ -58,13 +68,16 @@ void cargar_historial(Dequeue* dq) {
     FILE* file = fopen(HISTORIAL_FILE, "r");
     if (file == NULL) return; // Si no existe, no hay nada que cargar
 
-    char line[1024];
+    char line[COMMAND_SIZE];
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0; // Limpiar salto de línea
         
         if (strlen(line) > 0) {
             // Insertamos al inicio para mantener orden cronológico al leer
-            push_front(dq, strdup(line));
+            linea * nueva_linea = (linea*)malloc(sizeof(linea));
+            nueva_linea->num = getSize(dq) + 1; // Asignar número secuencial
+            nueva_linea->comando = strdup(line); // Duplicar el comando para evitar
+            push_front(dq, nueva_linea);
         }
     }
     fclose(file);
@@ -99,10 +112,10 @@ void liberar_historial(Historial* historial, void (*freeFunc)(void*)) {
 //UpArrow
 void* obtener_historial_anterior(Historial* historial) {
     if (historial == NULL ) return NULL;
-    if(historial->dq->head == NULL) return "";
+    if(historial->dq->head == NULL) return NULL;
 
     // Si es la primera vez que presionamos "Arriba"
-    if (historial->cursor_actual == NULL && historial->dq->head != NULL) {
+    if (historial->cursor_actual == NULL) {
         historial->cursor_actual = historial->dq->head;
     } 
     // Si no es el final de la lista, avanzamos al siguiente (más antiguo)
@@ -110,7 +123,7 @@ void* obtener_historial_anterior(Historial* historial) {
         historial->cursor_actual = historial->cursor_actual->next;
     }
 
-    return historial->cursor_actual->dato;
+    return ((linea*)historial->cursor_actual->dato)->comando; // Retornar el comando del nodo actual
 }
 
 //Down Arrow
@@ -120,7 +133,7 @@ void* obtener_historial_posterior(Historial* historial) {
     // Si bajamos, vamos hacia el 'prev' (más reciente)
     if (historial->cursor_actual->prev != NULL) {
         historial->cursor_actual = historial->cursor_actual->prev;
-        return historial->cursor_actual->dato;
+        return ((linea*)historial->cursor_actual->dato)->comando;
     } else {
         // Si llegamos al inicio (lo más reciente) y bajamos una vez más, 
         // el cursor vuelve a NULL (línea vacía para escribir algo nuevo)

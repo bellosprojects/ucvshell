@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "shell_loop.h"
 #include "historial.h"
-#include <signal.h>
+#include "../include/signals.h"
 
 void liberar_nodo_linea(void* dato) {
     if (dato == NULL) return;
@@ -16,7 +16,7 @@ void liberar_nodo_linea(void* dato) {
 int main(int argc, char *argv[]){
 
     // - Manejo de señales
-    signal(SIGSTOP, SIG_IGN);
+    configurar_señales();
 
     // Por hacer
     // - Tabla de Jobs

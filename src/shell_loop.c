@@ -95,8 +95,11 @@ void shell_loop(Historial *historial){
     printf("%s", PROMPT);
     fflush(stdout);
 
+    int is_exit = 0;
 
     while(1){
+
+        if(is_exit) break;
 
         TipoTecla tecla = procesarEntrada(&caracter_leido);
 
@@ -215,7 +218,7 @@ void shell_loop(Historial *historial){
                 trim(buffer_comando);
 
                 printf("\n"); 
-                if(!strcmp(buffer_comando, "exit")) exit(0);
+                if(!strcmp(buffer_comando, "exit")) is_exit = 1;
 
                 if (tamano_cadena > 0){
                     agregar_historial(historial, buffer_comando);

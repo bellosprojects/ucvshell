@@ -23,6 +23,7 @@ void push_back(Dequeue* dq, void* dato);
 
 int getSize(Dequeue* dq);
 void* getAt(Dequeue* dq, int index);
+void* removeAt(Dequeue* dq, int index);
 void* find(Dequeue* dq, void* dato, int (*cmpFunc)(void*, void*));
 void* pop_front(Dequeue* dq);
 void print(Dequeue* dq, void (*printFunc)(void*));

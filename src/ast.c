@@ -1,6 +1,5 @@
 #include "ast.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 command_t *crear_comando(char **argv, char *input, char* output, int append, int bg){
 
@@ -19,14 +18,13 @@ command_t *crear_comando(char **argv, char *input, char* output, int append, int
 
 ast_node_t* crear_nodo_comando(command_t *comando){
 
-    
     ast_node_t* nodo = (ast_node_t*)malloc(sizeof(ast_node_t));
-    
+
     if(!nodo) return NULL;
-    
+
     nodo->data.cmd = comando;
     nodo->type = NODE_COMMAND;
-    
+
     return nodo;
 }
 
@@ -43,17 +41,6 @@ ast_node_t* crear_nodo_operador(node_type_t type, ast_node_t *left, ast_node_t* 
     return nodo;
 }
 
-void liberar_comando(command_t* comando){
-    if(comando->argv) {
-        for(int i = 0; comando->argv[i]; i++) free(comando->argv[i]);
-        free(comando->argv);
-    }
-
-    free(comando->input_file);
-    free(comando->output_file);
-    free(comando);
-}
-
 void liberar_ast(ast_node_t *nodo){
 
     if(!nodo) return;
@@ -62,7 +49,17 @@ void liberar_ast(ast_node_t *nodo){
 
         command_t *cmd = nodo->data.cmd;
 
-        if(cmd) liberar_comando(cmd);
+        if(cmd){
+
+            if(cmd->argv) {
+                for(int i = 0; cmd->argv[i]; i++) free(cmd->argv[i]);
+                free(cmd->argv);
+            }
+
+            free(cmd->input_file);
+            free(cmd->output_file);
+            free(cmd);
+        }
 
     } else {
         liberar_ast(nodo->data.op.left);
@@ -70,24 +67,4 @@ void liberar_ast(ast_node_t *nodo){
     }
 
     free(nodo);
-}
-
-token_t *crear_token(int type, char* value){
-    
-    token_t* t = (token_t*)malloc(sizeof(token_t));
-
-    if(!t) return NULL;
-
-    t->type = type;
-    t->value = value;
-
-    return t;
-}
-
-void liberar_token(token_t* token){
-    if(token){
-        free(token->value);
-    }
-
-    free(token);
 }

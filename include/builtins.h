@@ -7,5 +7,7 @@
  * @return 1 si es un comando builtin, 0 en caso contrario
  */
 int is_builtin(const char* command);
+int ejecutar_cd(char **args);
+int pwd();
 
 #endif

@@ -76,8 +76,8 @@ int procesar_linea(char *linea){
 
     /// ejecutar_arbol(ast);
 
-
     liberar_ast(ast);
+    freedq(tokens, free);
 
     return 0;
 }
@@ -85,11 +85,11 @@ int procesar_linea(char *linea){
 void shell_loop(Historial *historial){
     
     int caracter_leido=0;
-    char buffer_comando[1024]= "";
+    char buffer_comando[256]= "";
     int tamano_cadena=0;
     int posicion_cursor=0;
 
-    char comando_temporal[1024] = "";
+    char comando_temporal[256] = "";
     int editando_temporal = 1;
 
     printf("%s", PROMPT);
@@ -218,7 +218,16 @@ void shell_loop(Historial *historial){
                 trim(buffer_comando);
 
                 printf("\n"); 
-                if(!strcmp(buffer_comando, "exit")) is_exit = 1;
+                if(!strcmp(buffer_comando, "exit")){
+                    guardar_historial(historial);
+                    return;  
+                } 
+                
+                if(strcmp(buffer_comando, "history") == 0){
+                    imprimir_historial(historial);
+                    //guardar_historial(historial);
+                    return;
+                }
 
                 if (tamano_cadena > 0){
                     agregar_historial(historial, buffer_comando);

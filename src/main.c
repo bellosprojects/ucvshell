@@ -4,6 +4,15 @@
 #include "historial.h"
 #include <signal.h>
 
+void liberar_nodo_linea(void* dato) {
+    if (dato == NULL) return;
+    linea* l = (linea*)dato;
+    if (l->comando != NULL) {
+        free(l->comando);
+    }
+    free(l);
+}
+
 int main(int argc, char *argv[]){
 
     // - Manejo de señales
@@ -14,8 +23,7 @@ int main(int argc, char *argv[]){
     Historial* historial = crear_historial();
     
     shell_loop(historial);
-
-    liberar_historial(historial, free);
+    liberar_historial(historial, liberar_nodo_linea);
 
     // Por hacer
     // - Liberar memoria (Jobs)

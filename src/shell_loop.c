@@ -74,8 +74,7 @@ int procesar_linea(char *linea){
     Dequeue *tokens = tokentizar(linea);
     ast_node_t *ast = crear_arbol_de_ejecucion(tokens);
 
-    /// ejecutar_arbol(ast);
-
+    ejecutar_ast(ast);
 
     liberar_ast(ast);
 

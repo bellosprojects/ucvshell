@@ -93,6 +93,33 @@ void* pop_front(Dequeue* dq) {
     return data;
 }
 
+void* removeAt(Dequeue* dq, int index){
+    if (dq == NULL || index < 0 || index >= dq->size) return NULL;
+
+    Nodo* current = dq->head;
+    for (int i = 0; i < index; i++) {
+        current = current->next;
+    }
+
+    void* data = current->dato;
+
+    if (current->prev != NULL) {
+        current->prev->next = current->next;
+    } else {
+        dq->head = current->next; // Si es el primer nodo
+    }
+
+    if (current->next != NULL) {
+        current->next->prev = current->prev;
+    } else {
+        dq->tail = current->prev; // Si es el último nodo
+    }
+
+    free(current);
+    dq->size--;
+    return data;
+}
+
 int getSize(Dequeue* dq){
     return dq->size;
 }

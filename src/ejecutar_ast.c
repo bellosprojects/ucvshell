@@ -1,4 +1,4 @@
-#include "../include/ast.h"
+#include "ast.h"
 #include <fcntl.h>    
 #include <unistd.h>   
 #include <sys/types.h>
@@ -6,7 +6,7 @@
 #include <stdio.h>    
 #include <stdlib.h>  
 #include <signal.h>
-#include "../include/signals.h"
+#include "signals_.h"
 
 
 void ejecutar_comando(command_t *cmd){

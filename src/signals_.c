@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
+#include "signals_.h"
 
 void manejador_señales(int sig) {
     int old_errno= errno;

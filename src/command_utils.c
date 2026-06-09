@@ -1,5 +1,4 @@
 #include "command_utils.h"
-#include "path_utils.h"
 #include "dequeue.h"
 #include "ast.h"
 #include <string.h>
@@ -302,9 +301,9 @@ void guardar(Dequeue* tokens, char *current_token, int type, int *n){
 }
 
 Dequeue *tokentizar(char *linea){
-
+    
     Dequeue *tokens = crear_dequeue();
-
+    
     if(!tokens) return NULL;
 
     int is_large = 0;
@@ -346,22 +345,4 @@ Dequeue *tokentizar(char *linea){
     print(tokens, print_token);
 
     return tokens;
-}
-
-void extraer_partes_de_comando(char *comando, char *ruta_programa, char **args){
-
-    char *espacio = strchr(comando, ' ');
-
-    if(espacio){
-        *espacio = '\0';
-        *args = espacio + 1;
-    } else {
-        *args = "";
-    }
-    
-    char * ruta_absoluta = find_command_path(comando);
-
-    ruta_programa = ruta_absoluta;
-
-    if(espacio) *espacio = ' ';
 }

@@ -3,11 +3,7 @@
 #include "ast.h"
 #include "dequeue.h"
 
-/// @brief Separa el comado en programa y sus argumentos
-/// @param comando (in) comando original del usuario
-/// @param ruta_programa (out) donde se almacena la direccion real del programa
-/// @param args (out) donde se almacena la lista de argumentos
-void extraer_partes_de_comando(char *comando, char *ruta_programa, char **args);
+#define MAX_COMMAND_LENGTH 128
 
 /// @brief Crea un arbol de ejecucion basado en la lista de tokens
 /// @param tokens La lista de tokens a procesar

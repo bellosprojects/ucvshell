@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "shell_loop.h"
 #include "historial.h"
-#include "../include/signals.h"
+#include "signals_.h"
 
 void liberar_nodo_linea(void* dato) {
     if (dato == NULL) return;

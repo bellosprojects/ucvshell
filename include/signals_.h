@@ -7,7 +7,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-void manejador_ctrlc(int sig);
+void manejador_señales(int sig);
 void configurar_señales();
 
 #endif

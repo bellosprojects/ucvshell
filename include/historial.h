@@ -9,6 +9,11 @@ extern const char* HISTORIAL_FILE;
 
 typedef struct Historial Historial;
 
+typedef struct linea{
+    int num;
+    char* comando;
+} linea;
+
 /// @brief Crear un nuevo historial
 /// @return Apuntando al nuevo historial creado
 Historial* crear_historial();
@@ -48,7 +53,7 @@ void* obtener_historial_posterior(Historial* historial);
 /// @brief Imprime el historial
 /// @param historial Apuntandor al historial
 /// @param printFunc Funcion personalizada para imprimir el payload de cada nodo
-void imprimir_historial(Historial* historial, void (*printFunc)(void*));
+void imprimir_historial(Historial* historial);
 
 
 /// @brief Liberar la memoria del historial

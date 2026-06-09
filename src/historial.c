@@ -4,17 +4,13 @@
 #include "dequeue.h"
 #include "historial.h"
 #define COMMAND_SIZE 256
-const char* HISTORIAL_FILE = "../historial.txt";
+
+const char* HISTFILE = ".ucvsh_history";
 
 typedef struct Historial {
     Dequeue* dq;
     Nodo* cursor_actual;
 } Historial;
-
-typedef struct linea{
-    int num;
-    char* comando;
-} linea;
 
 void cargar_historial(Dequeue* dq);
 
@@ -30,42 +26,38 @@ Historial* crear_historial() {
 
 void actualizar_valor(Historial* historial, char* nuevo_valor){
     if (!historial || !nuevo_valor) return;
-    if (historial->cursor_actual == NULL) return; // No hay comando seleccionado
+    if (historial->cursor_actual == NULL) return; 
 
-    // Liberar el valor anterior para evitar fugas de memoria
-    free(historial->cursor_actual->dato);
+    linea* linea_actual = (linea*)historial->cursor_actual->dato;
+
+    if (linea_actual->comando) {
+        free(linea_actual->comando);
+    }
     
-    linea * nueva_linea = (linea*)malloc(sizeof(linea));
-    nueva_linea->num = ((linea*)historial->cursor_actual->dato)->num; // Mantener el mismo número
-    nueva_linea->comando = strdup(nuevo_valor); // Duplicar el nuevo comando
-    historial->cursor_actual->dato = nueva_linea;
+    linea_actual->comando = strdup(nuevo_valor);
 }
 
 void agregar_historial(Historial* historial, char* dato) {
     if (!historial || !dato) return;
     
     // Comparar con el último para evitar duplicados seguidos
-    char* ultimo = getAt(historial->dq, 0); 
-    if (ultimo && strcmp(ultimo, dato) == 0) return;
+    if (getSize(historial->dq) > 0) {
+        linea* ultimo_nodo = (linea*)getAt(historial->dq, 0);
+        if (ultimo_nodo && ultimo_nodo->comando && strcmp(ultimo_nodo->comando, dato) == 0) {
+            return; 
+        }
+    }
     
-    // IMPORTANTE: Duplicar la memoria porque 'linea' en shell_loop es local
     linea * nueva_linea = (linea*)malloc(sizeof(linea));
-    nueva_linea->num = getSize(historial->dq) + 1; // Asignar número secuencial
+    nueva_linea->num = getSize(historial->dq) +1; // Asignar número secuencial
     nueva_linea->comando = strdup(dato); // Duplicar el comando para evitar problemas de memoria
     //char* copia = strdup(dato);
     push_front(historial->dq, nueva_linea);
-    
     historial->cursor_actual = NULL; // Resetear navegación
-
-    FILE* f = fopen(HISTORIAL_FILE, "a");
-    if (f) {
-        fprintf(f, "%s\n", nueva_linea->comando);
-        fclose(f);
-    }
 }
 
 void cargar_historial(Dequeue* dq) {
-    FILE* file = fopen(HISTORIAL_FILE, "r");
+    FILE* file = fopen(HISTFILE , "r");
     if (file == NULL) return; // Si no existe, no hay nada que cargar
 
     char line[COMMAND_SIZE];
@@ -77,7 +69,7 @@ void cargar_historial(Dequeue* dq) {
             linea * nueva_linea = (linea*)malloc(sizeof(linea));
             nueva_linea->num = getSize(dq) + 1; // Asignar número secuencial
             nueva_linea->comando = strdup(line); // Duplicar el comando para evitar
-            push_front(dq, nueva_linea);
+            push_back(dq, nueva_linea);
         }
     }
     fclose(file);
@@ -87,16 +79,15 @@ void guardar_historial(Historial* historial) {
     if (!historial) return;
 
     // Usamos "w" para sobrescribir con el estado actual de la lista
-    FILE* file = fopen(HISTORIAL_FILE, "w");
+    FILE* file = fopen(HISTFILE , "w");
     if (file == NULL) {
         perror("Error al guardar historial");
         return;
     }
 
-    // Recorrer la lista (usando tu función getSize y getAt)
     for(int i = 0; i < getSize(historial->dq); i++) {
-        char* str = (char*)getAt(historial->dq, i);
-        if (str) fprintf(file, "%s\n", str);
+        linea* data = (linea *)getAt(historial->dq, i);
+        if (data && data->comando) fprintf(file, "%s\n", data->comando);
     }
 
     fclose(file);
@@ -112,7 +103,7 @@ void liberar_historial(Historial* historial, void (*freeFunc)(void*)) {
 //UpArrow
 void* obtener_historial_anterior(Historial* historial) {
     if (historial == NULL ) return NULL;
-    if(historial->dq->head == NULL) return NULL;
+    if(historial->dq->head == NULL) return "";
 
     // Si es la primera vez que presionamos "Arriba"
     if (historial->cursor_actual == NULL) {
@@ -142,6 +133,10 @@ void* obtener_historial_posterior(Historial* historial) {
     }
 }
 
-void imprimir_historial(Historial* historial, void (*printFunc)(void*)){
-    print(historial->dq, printFunc);
+void imprimir_historial(Historial* historial){
+    if (!historial) return;
+    for(int i = getSize(historial->dq) -1; i >= 0; i--) {
+        linea* linea_dato= (linea*)getAt(historial->dq, i);
+        if (linea_dato) printf("%d %s\n", linea_dato->num, linea_dato->comando);
+    }
 }

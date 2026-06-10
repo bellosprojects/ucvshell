@@ -15,8 +15,8 @@ typedef enum {
 } TipoTecla;
 
 int lecturaInmediata();
-TipoTecla procesarEntrada(int *caracter, Dequeue* jobs);
+TipoTecla procesarEntrada(int *caracter);
 /// @brief Loop de ucvsh 
-void shell_loop(Historial *historial, Dequeue* jobs);
+void shell_loop(Historial *historial);
 
 #endif

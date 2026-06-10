@@ -24,14 +24,14 @@ int agregar_job(Dequeue* jobs, const char* command, int pid, Status status){
     new_job->command = (char*)strdup(command); // Duplicar el comando para evitar problemas de
     new_job->pid = pid;
     new_job->status = status;
+    new_job->mostrado = 0;
 
     push_back(jobs, new_job);
     return 0;
 }
 
-int eliminar_job(int pid){
-
-    Dequeue *jobs = obtener_jobs();
+int eliminar_job(Dequeue* jobs, int pid){
+    if (jobs == NULL) return 1;
 
     for (int i = 0; i < getSize(jobs); i++) {
         Job* job = (Job*)getAt(jobs, i);
@@ -44,41 +44,31 @@ int eliminar_job(int pid){
     return 1;
 }
 
-int actualizar_status(Dequeue* jobs){
+int actualizar_status(Dequeue* jobs) {
     int status;
     for (int i = 0; i < getSize(jobs); i++) {
-        // WNOHANG verifica el estado inmediatamente sin bloquear la shell
-        Job* new_job = (Job*)getAt(jobs, i);
-        pid_t result = waitpid(new_job->pid, &status, WNOHANG | WUNTRACED | WCONTINUED);
+        Job* job = (Job*)getAt(jobs, i);
+        pid_t result = waitpid(job->pid, &status, WNOHANG | WUNTRACED | WCONTINUED);
         
         if (result > 0) {
             if (WIFEXITED(status) || WIFSIGNALED(status)) {
-                // El proceso terminó
-                new_job->status = FINALIZADO;
+                job->status = FINALIZADO;
+                job->mostrado = 0;   // Recién terminado, aún no mostrado
             } else if (WIFSTOPPED(status)) {
-                // El proceso fue suspendido (ej: Ctrl+Z)
-                new_job->status = SUSPENDIDO;
+                job->status = SUSPENDIDO;
             } else if (WIFCONTINUED(status)) {
-                // El proceso reanudó su marcha
-                new_job->status = EJECUTANDO;
+                job->status = EJECUTANDO;
             }
         } else if (result == -1) {
-            // Si da -1, el proceso ya no existe o hubo un error
-            new_job->status = FINALIZADO;
-        }
-    }
-
-    // Limpiar de la tabla los que ya finalizaron de forma definitiva
-    for (int i = 0; i < getSize(jobs); i++) {
-        Job* new_job = (Job*)getAt(jobs, i);
-        if (new_job->status == FINALIZADO) {
-            eliminar_job(new_job->pid);
+            // El proceso ya no existe
+            job->status = FINALIZADO;
+            job->mostrado = 0;
         }
     }
     return 0;
 }
 
-void printJobs(void* dato){
+void printJobs(void* dato) {
     Job* job = (Job*)dato;
     const char* state_str;
     switch (job->status) {
@@ -88,14 +78,33 @@ void printJobs(void* dato){
         default: state_str = "Unknown"; break;
     }
     printf("[%d]  %d %-20s %s\n", job->id, job->pid, state_str, job->command);
+    
+    // Marcar como mostrado si es FINALIZADO
+    if (job->status == FINALIZADO) {
+        job->mostrado = 1;
+    }
 }
 
-int listar_jobs(Dequeue* jobs){
-    actualizar_status(jobs);
+int listar_jobs(Dequeue* jobs) {
+    actualizar_status(jobs);   // 1. Actualiza estados (sin eliminar)
+    
     if (getSize(jobs) == 0) {
         return 0;
     }
-    print(jobs, printJobs);
+    
+    print(jobs, printJobs);    // 2. Imprime y marca los finalizados como 'mostrados = 1'
+    
+    // 3. Recorrer en REVERSA para eliminar de forma segura
+    for (int i = getSize(jobs) - 1; i >= 0; i--) {
+        Job* job = (Job*)getAt(jobs, i);
+        
+        if (job->status == FINALIZADO && job->mostrado) {
+            // Removemos directamente por índice en lugar de buscar por PID
+            Job* aux = removeAt(jobs, i); 
+            liberar_job(aux); 
+        }
+    }
+    
     return 0;
 }
 

@@ -140,3 +140,12 @@ void imprimir_historial(Historial* historial){
         if (linea_dato) printf("%d %s\n", linea_dato->num, linea_dato->comando);
     }
 }
+
+void liberar_nodo_linea(void* dato) {
+    if (dato == NULL) return;
+    linea* l = (linea*)dato;
+    if (l->comando != NULL) {
+        free(l->comando);
+    }
+    free(l);
+}

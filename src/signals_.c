@@ -7,11 +7,12 @@
 #include "jobs.h"
 
 void manejador_señales(int sig) {
-    int old_errno= errno;
+    int old_errno = errno;
     int status;
     pid_t pid;
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-        eliminar_job(pid);
+        // Solo reap child processes; no eliminamos el job aquí.
+        // El listado de jobs mostrará el estado FINALIZADO y luego lo eliminará.
     }
     errno = old_errno;
 }

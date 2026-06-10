@@ -61,4 +61,6 @@ void imprimir_historial(Historial* historial);
 /// @param freeFunc función personalizada para liberar el payload de cada nodo
 void liberar_historial(Historial* historial, void (*freeFunc)(void*));
 
+void liberar_nodo_linea(void* dato);
+
 #endif

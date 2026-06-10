@@ -8,10 +8,10 @@
 #include <string.h>
 #include <signal.h>
 #include "signals_.h"
-#include "jobs.h"
 #include "builtins.h"
+#include "jobs.h"
 
-void ejecutar_ast(ast_node_t *nodo, Dequeue* jobs);
+void ejecutar_ast(ast_node_t *nodo);
 
 static int last_exit_status = 0;
 void set_last_exit_status(int status) {
@@ -22,26 +22,26 @@ int get_last_exit_status() {
     return last_exit_status;
 }
 
-void ejecutar_and(ast_node_t *nodo, Dequeue* jobs){
-    ejecutar_ast(nodo->data.op.left, jobs);
+void ejecutar_and(ast_node_t *nodo){
+    ejecutar_ast(nodo->data.op.left);
     if(get_last_exit_status() == 0){
-        ejecutar_ast(nodo->data.op.right, jobs);
+        ejecutar_ast(nodo->data.op.right);
     }
 }
 
-void ejecutar_or(ast_node_t *nodo, Dequeue* jobs){
-    ejecutar_ast(nodo->data.op.left, jobs);
+void ejecutar_or(ast_node_t *nodo){
+    ejecutar_ast(nodo->data.op.left);
     if(get_last_exit_status() != 0){
-        ejecutar_ast(nodo->data.op.right, jobs);
+        ejecutar_ast(nodo->data.op.right);
     }
 }
 
-void ejecutar_secuencia(ast_node_t *nodo, Dequeue* jobs){
-    ejecutar_ast(nodo->data.op.left, jobs);
-    ejecutar_ast(nodo->data.op.right, jobs);
+void ejecutar_secuencia(ast_node_t *nodo){
+    ejecutar_ast(nodo->data.op.left);
+    ejecutar_ast(nodo->data.op.right);
 }
 
-void ejecutar_pipe(ast_node_t *nodo, Dequeue* jobs){
+void ejecutar_pipe(ast_node_t *nodo){
     int fd[2];
     if (pipe(fd) == -1) {
         perror("Error al crear pipe");
@@ -53,7 +53,7 @@ void ejecutar_pipe(ast_node_t *nodo, Dequeue* jobs){
         dup2(fd[1], STDOUT_FILENO);
         close(fd[0]);
         close(fd[1]);
-        ejecutar_ast(nodo->data.op.left, jobs);
+        ejecutar_ast(nodo->data.op.left);
         exit(get_last_exit_status());
     }
 
@@ -62,7 +62,7 @@ void ejecutar_pipe(ast_node_t *nodo, Dequeue* jobs){
         dup2(fd[0], STDIN_FILENO);
         close(fd[0]);
         close(fd[1]);
-        ejecutar_ast(nodo->data.op.right, jobs);
+        ejecutar_ast(nodo->data.op.right);
         exit(get_last_exit_status());
     }
 
@@ -75,18 +75,31 @@ void ejecutar_pipe(ast_node_t *nodo, Dequeue* jobs){
 }
 
 
-void ejecutar_comando(command_t *cmd, Dequeue* jobs){
+void ejecutar_comando(command_t *cmd){
     if(is_builtin(cmd->argv[0])){
         if(strcmp(cmd->argv[0], "cd") == 0){
             set_last_exit_status(ejecutar_cd(cmd->argv));
         } else if(strcmp(cmd->argv[0], "pwd") == 0){
             set_last_exit_status(pwd());
         } else if(strcmp(cmd->argv[0], "exit") == 0){
-            exit(0);
+           // cmd->argv[1] != NULL ? exit(atoi(cmd->argv[1])) : exit(0);
+
+        } else if(strcmp(cmd->argv[0], "history") == 0){
+            fprintf(stderr, "Comando builtin no implementado\n");
+            set_last_exit_status(1);
+        } else if(strcmp(cmd->argv[0], "help") == 0){
+            //implementar help
+            fprintf(stderr, "this is the help command \n");
+            set_last_exit_status(1);
+        } else if(strcmp(cmd->argv[0], "jobs") == 0){
+            //implementar jobs
+            listar_jobs((Dequeue *)obtener_jobs());
+            set_last_exit_status(1);
         } else {
             fprintf(stderr, "Comando builtin no implementado\n");
             set_last_exit_status(1);
         }
+        return;
     }
 
     pid_t pid = fork();
@@ -139,9 +152,9 @@ void ejecutar_comando(command_t *cmd, Dequeue* jobs){
                 set_last_exit_status(128 + WTERMSIG(status));
             }
         } else {
-            if(jobs != NULL){
-                agregar_job(jobs, cmd->argv[0], pid, EJECUTANDO);
-                printf("[%d] %d\n", getSize(jobs), pid);
+            if(obtener_jobs() != NULL){
+                agregar_job(obtener_jobs(), cmd->argv[0], pid, EJECUTANDO);
+                printf("[%d] %d\n", getSize(obtener_jobs()), pid);
             } else {
                 fprintf(stderr, "Error: Estructura de jobs no inicializada.\n");
             }
@@ -149,25 +162,25 @@ void ejecutar_comando(command_t *cmd, Dequeue* jobs){
         return;
     }
 }
-void ejecutar_ast(ast_node_t *nodo, Dequeue* jobs){
+void ejecutar_ast(ast_node_t *nodo){
 
     if(!nodo) return;
 
     switch (nodo->type) {
         case NODE_COMMAND:
-            ejecutar_comando(nodo->data.cmd, jobs);
+            ejecutar_comando(nodo->data.cmd);
             break;
         case NODE_PIPE:
-            ejecutar_pipe(nodo, jobs);
+            ejecutar_pipe(nodo);
             break;
         case NODE_AND:
-            ejecutar_and(nodo, jobs);
+            ejecutar_and(nodo);
             break;
         case NODE_OR:
-            ejecutar_or(nodo, jobs);
+            ejecutar_or(nodo);
             break;
         case NODE_SEMICOLON:
-            ejecutar_secuencia(nodo, jobs);
+            ejecutar_secuencia(nodo);
             break;
         default:
             fprintf(stderr, "Tipo de nodo desconocido\n");

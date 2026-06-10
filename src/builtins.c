@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <stdio.h>
 #include "builtins.h"
 
 int is_builtin(const char* command) {

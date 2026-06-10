@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "shell_loop.h"
 #include "historial.h"
+#include "jobs.h"
 #include "signals_.h"
 
 void liberar_nodo_linea(void* dato) {
@@ -19,14 +20,14 @@ int main(int argc, char *argv[]){
     configurar_señales();
 
     // Por hacer
-    // - Tabla de Jobs
+    Dequeue* jobs = crear_dequeue();
     Historial* historial = crear_historial();
     
-    shell_loop(historial);
+    shell_loop(historial, jobs);
     liberar_historial(historial, liberar_nodo_linea);
 
     // Por hacer
-    // - Liberar memoria (Jobs)
+    freedq(jobs, liberar_job);
 
     return 0;
 }

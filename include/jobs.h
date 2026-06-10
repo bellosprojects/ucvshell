@@ -22,5 +22,6 @@ int agregar_job(Dequeue* jobs, const char* command, int pid, Status status);
 int eliminar_job(Dequeue* jobs, int pid);
 int actualizar_status(Dequeue* jobs);
 int listar_jobs(Dequeue* jobs);
+void liberar_job(Job* job);
 
 #endif

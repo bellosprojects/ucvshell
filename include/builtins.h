@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdio.h>
+
 #ifndef BUILTINS_H
 #define BUILTINS_H
 

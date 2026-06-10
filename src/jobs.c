@@ -20,8 +20,7 @@ int eliminar_job(Dequeue* jobs, int pid){
         Job* job = (Job*)getAt(jobs, i);
         if (job->pid == pid) {
             Job* aux = removeAt(jobs, i);
-            free(aux->command);            
-            free(aux);
+            liberar_job(aux);
             return 0; // Éxito
         }
     }
@@ -76,12 +75,17 @@ void printJobs(void* dato){
 
 int listar_jobs(Dequeue* jobs){
     actualizar_status(jobs);
-
     if (getSize(jobs) == 0) {
         return 0;
     }
-
     print(jobs, printJobs);
     return 0;
+}
+
+void liberar_job(Job* job){
+    if(job){
+        free(job->command);
+    }
+    free(job);
 }
 

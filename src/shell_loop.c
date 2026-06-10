@@ -80,6 +80,9 @@ int procesar_linea(char *linea, Dequeue* jobs){
     
     liberar_ast(ast);
 
+    printf("\n");
+    fflush(stdout);
+
     return 0;
 }
 

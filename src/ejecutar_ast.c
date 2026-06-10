@@ -173,19 +173,3 @@ void ejecutar_ast(ast_node_t *nodo, Dequeue* jobs){
             fprintf(stderr, "Tipo de nodo desconocido\n");
     }
 }
-
-//SEÑALES
-//JOBLIST
-
-
-/*if (cmd->background) {
-    pid_t pid = fork();
-    if (pid == 0) {
-        // ... hijo: redirige stdin a /dev/null y ejecuta ...
-    } else {
-        // ... padre: NO hace waitpid. 
-        // Agrega el job a la lista:
-        agregar_job(pid, cmd->name);
-        printf("[%d] %d\n", num_job, pid); // Típico formato de shell
-    }
-}*/

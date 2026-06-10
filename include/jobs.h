@@ -19,9 +19,11 @@ typedef struct Job {
 } Job;
 
 int agregar_job(Dequeue* jobs, const char* command, int pid, Status status);
-int eliminar_job(Dequeue* jobs, int pid);
+int eliminar_job(int pid);
 int actualizar_status(Dequeue* jobs);
 int listar_jobs(Dequeue* jobs);
-void liberar_job(Job* job);
+void liberar_job(void* job);
+
+Dequeue* obtener_jobs();
 
 #endif

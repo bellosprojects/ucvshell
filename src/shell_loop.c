@@ -79,7 +79,6 @@ int procesar_linea(char *linea, Dequeue* jobs){
     ejecutar_ast(ast, jobs);
     
     liberar_ast(ast);
-    //freedq(tokens, free);
 
     return 0;
 }

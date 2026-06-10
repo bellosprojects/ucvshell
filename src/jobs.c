@@ -1,13 +1,27 @@
 #include "dequeue.h"
 #include "jobs.h"
 #include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+
+Dequeue *jobs_global = NULL;
+
+Dequeue* obtener_jobs(){
+    if(jobs_global == NULL){
+        jobs_global = crear_dequeue();
+    }
+    return jobs_global;
+}
 
 int agregar_job(Dequeue* jobs, const char* command, int pid, Status status){
     Job* new_job = (Job*)malloc(sizeof(Job));
     if (!new_job) return -1; // Error de memoria
     
     new_job->id = getSize(jobs) +1;
-    new_job->command = strdup(command); // Duplicar el comando para evitar problemas de
+    new_job->command = (char*)strdup(command); // Duplicar el comando para evitar problemas de
     new_job->pid = pid;
     new_job->status = status;
 
@@ -15,7 +29,10 @@ int agregar_job(Dequeue* jobs, const char* command, int pid, Status status){
     return 0;
 }
 
-int eliminar_job(Dequeue* jobs, int pid){
+int eliminar_job(int pid){
+
+    Dequeue *jobs = obtener_jobs();
+
     for (int i = 0; i < getSize(jobs); i++) {
         Job* job = (Job*)getAt(jobs, i);
         if (job->pid == pid) {
@@ -55,7 +72,7 @@ int actualizar_status(Dequeue* jobs){
     for (int i = 0; i < getSize(jobs); i++) {
         Job* new_job = (Job*)getAt(jobs, i);
         if (new_job->status == FINALIZADO) {
-            eliminar_job(jobs, new_job->pid);
+            eliminar_job(new_job->pid);
         }
     }
     return 0;
@@ -82,7 +99,8 @@ int listar_jobs(Dequeue* jobs){
     return 0;
 }
 
-void liberar_job(Job* job){
+void liberar_job(void* node){
+    Job *job = (Job*)node;
     if(job){
         free(job->command);
     }

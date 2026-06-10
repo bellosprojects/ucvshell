@@ -5,9 +5,13 @@
 #include <sys/wait.h> 
 #include <stdio.h>    
 #include <stdlib.h>  
+#include <string.h>
 #include <signal.h>
 #include "signals_.h"
 #include "jobs.h"
+#include "builtins.h"
+
+void ejecutar_ast(ast_node_t *nodo, Dequeue* jobs);
 
 static int last_exit_status = 0;
 void set_last_exit_status(int status) {
@@ -17,6 +21,59 @@ void set_last_exit_status(int status) {
 int get_last_exit_status() {
     return last_exit_status;
 }
+
+void ejecutar_and(ast_node_t *nodo, Dequeue* jobs){
+    ejecutar_ast(nodo->data.op.left, jobs);
+    if(get_last_exit_status() == 0){
+        ejecutar_ast(nodo->data.op.right, jobs);
+    }
+}
+
+void ejecutar_or(ast_node_t *nodo, Dequeue* jobs){
+    ejecutar_ast(nodo->data.op.left, jobs);
+    if(get_last_exit_status() != 0){
+        ejecutar_ast(nodo->data.op.right, jobs);
+    }
+}
+
+void ejecutar_secuencia(ast_node_t *nodo, Dequeue* jobs){
+    ejecutar_ast(nodo->data.op.left, jobs);
+    ejecutar_ast(nodo->data.op.right, jobs);
+}
+
+void ejecutar_pipe(ast_node_t *nodo, Dequeue* jobs){
+    int fd[2];
+    if (pipe(fd) == -1) {
+        perror("Error al crear pipe");
+        return;
+    }
+
+    pid_t pid1= fork();
+    if(pid1==0){
+        dup2(fd[1], STDOUT_FILENO);
+        close(fd[0]);
+        close(fd[1]);
+        ejecutar_ast(nodo->data.op.left, jobs);
+        exit(get_last_exit_status());
+    }
+
+    pid_t pid2= fork();
+    if(pid2==0){
+        dup2(fd[0], STDIN_FILENO);
+        close(fd[0]);
+        close(fd[1]);
+        ejecutar_ast(nodo->data.op.right, jobs);
+        exit(get_last_exit_status());
+    }
+
+    close(fd[0]);
+    close(fd[1]);
+    int status1, status2;
+    waitpid(pid1, &status1, 0);
+    waitpid(pid2, &status2, 0);
+    set_last_exit_status(WEXITSTATUS(status2));
+}
+
 
 void ejecutar_comando(command_t *cmd, Dequeue* jobs){
     if(is_builtin(cmd->argv[0])){
@@ -116,59 +173,6 @@ void ejecutar_ast(ast_node_t *nodo, Dequeue* jobs){
             fprintf(stderr, "Tipo de nodo desconocido\n");
     }
 }
-
-void ejecutar_and(ast_node_t *nodo, Dequeue* jobs){
-    ejecutar_ast(nodo->data.op.left, jobs);
-    if(get_last_exit_status() == 0){
-        ejecutar_ast(nodo->data.op.right, jobs);
-    }
-}
-
-void ejecutar_or(ast_node_t *nodo, Dequeue* jobs){
-    ejecutar_ast(nodo->data.op.left, jobs);
-    if(get_last_exit_status() != 0){
-        ejecutar_ast(nodo->data.op.right, jobs);
-    }
-}
-
-void ejecutar_secuencia(ast_node_t *nodo, Dequeue* jobs){
-    ejecutar_ast(nodo->data.op.left, jobs);
-    ejecutar_ast(nodo->data.op.right, jobs);
-}
-
-void ejecutar_pipe(ast_node_t *nodo, Dequeue* jobs){
-    int fd[2];
-    if (pipe(fd) == -1) {
-        perror("Error al crear pipe");
-        return;
-    }
-
-    pid_t pid1= fork();
-    if(pid1==0){
-        dup2(fd[1], STDOUT_FILENO);
-        close(fd[0]);
-        close(fd[1]);
-        ejecutar_ast(nodo->data.op.left, jobs);
-        exit(get_last_exit_status());
-    }
-
-    pid_t pid2= fork();
-    if(pid2==0){
-        dup2(fd[0], STDIN_FILENO);
-        close(fd[0]);
-        close(fd[1]);
-        ejecutar_ast(nodo->data.op.right, jobs);
-        exit(get_last_exit_status());
-    }
-
-    close(fd[0]);
-    close(fd[1]);
-    int status1, status2;
-    waitpid(pid1, &status1, 0);
-    waitpid(pid2, &status2, 0);
-    set_last_exit_status(WEXITSTATUS(status2));
-}
-
 
 //SEÑALES
 //JOBLIST

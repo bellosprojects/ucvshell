@@ -17,11 +17,13 @@ void liberar_nodo_linea(void* dato) {
 int main(int argc, char *argv[]){
 
     // - Manejo de señales
-    configurar_señales();
-
+    
     // Por hacer
-    Dequeue* jobs = crear_dequeue();
+    
     Historial* historial = crear_historial();
+    Dequeue* jobs = obtener_jobs();
+    
+    configurar_señales();
     
     shell_loop(historial, jobs);
     liberar_historial(historial, liberar_nodo_linea);

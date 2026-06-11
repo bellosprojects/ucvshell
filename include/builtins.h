@@ -15,5 +15,6 @@
 int is_builtin(const char* command);
 int ejecutar_cd(char **args);
 int pwd();
+void ejecutar_fg(char **args, Dequeue* jobs);
 
 #endif

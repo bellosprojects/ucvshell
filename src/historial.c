@@ -3,9 +3,9 @@
 #include <string.h>
 #include "dequeue.h"
 #include "historial.h"
-#define COMMAND_SIZE 256
+#define PATH_SIZE 256
 
-const char* HISTFILE = ".ucvsh_history";
+char ruta_historial[PATH_SIZE] = "";
 
 typedef struct Historial {
     Dequeue* dq;
@@ -13,6 +13,20 @@ typedef struct Historial {
 } Historial;
 
 Historial *historial_global = NULL;
+
+void obtener_ruta_historial(char* buffer, size_t max_len) {
+    // Si ya fue calculada previamente, no la volvemos a calcular
+    if (strlen(buffer) > 0) return;
+
+    char* home = getenv("HOME");
+    if (home != NULL) {
+        // Construye la ruta: /home/usuario/.ucvsh_history
+        snprintf(buffer, max_len, "%s/%s", home, ".ucvsh_history");
+    } else {
+        // Plan de respaldo si HOME no está definido
+        snprintf(buffer, max_len, "%s", ".ucvsh_history");
+    }
+}
 
 void cargar_historial(Dequeue* dq);
 
@@ -66,10 +80,11 @@ void agregar_historial(Historial* historial, char* dato) {
 }
 
 void cargar_historial(Dequeue* dq) {
-    FILE* file = fopen(HISTFILE , "r");
+    obtener_ruta_historial(ruta_historial, sizeof(ruta_historial));
+    FILE* file = fopen(ruta_historial , "r");
     if (file == NULL) return; // Si no existe, no hay nada que cargar
 
-    char line[COMMAND_SIZE];
+    char line[PATH_SIZE];
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = 0; // Limpiar salto de línea
         
@@ -87,8 +102,10 @@ void cargar_historial(Dequeue* dq) {
 void guardar_historial(Historial* historial) {
     if (!historial) return;
 
+    obtener_ruta_historial(ruta_historial, sizeof(ruta_historial));
+
     // Usamos "w" para sobrescribir con el estado actual de la lista
-    FILE* file = fopen(HISTFILE , "w");
+    FILE* file = fopen(ruta_historial , "w");
     if (file == NULL) {
         perror("Error al guardar historial");
         return;

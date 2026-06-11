@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "dequeue.h"
-#define COMMAND_SIZE 256
-extern const char* HISTORIAL_FILE;
+#define PATH_SIZE 256
 
 #ifndef HISTORIAL_H
 #define HISTORIAL_H
@@ -14,10 +13,12 @@ typedef struct linea{
     char* comando;
 } linea;
 
+/// @brief Obtener el historial global (singleton)
+/// @return Apuntador al historial global
 Historial* obtener_historial();
 
 /// @brief Crear un nuevo historial
-/// @return Apuntando al nuevo historial creado
+/// @return Apuntador al nuevo historial creado
 Historial* crear_historial();
 
 /// @brief 
@@ -63,8 +64,12 @@ void imprimir_historial(Historial* historial);
 /// @param freeFunc función personalizada para liberar el payload de cada nodo
 void liberar_historial(Historial* historial, void (*freeFunc)(void*));
 
+/// @brief Funcion para liberar la struct linea
+/// @param dato 
 void liberar_nodo_linea(void* dato);
 
+/// @brief posicionar el cursor del historial en NULL (fuera de la lista)
+/// @param historial 
 void resetear_cursor(Historial* historial);
 
 #endif

@@ -112,7 +112,14 @@ void ejecutar_comando(command_t *cmd){
     }
 
     if(pid==0){
+
         setpgid(0, 0);
+        signal(SIGINT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGQUIT, SIG_DFL);
+        signal(SIGTTOU, SIG_DFL);
+        signal(SIGTTIN, SIG_DFL);
+
         if(cmd->input_file){
             int fd= open(cmd->input_file, O_RDONLY);
             if(fd==-1){
@@ -137,9 +144,6 @@ void ejecutar_comando(command_t *cmd){
             close(fd);
         }
 
-        signal(SIGINT, SIG_DFL);
-        signal(SIGTSTP, SIG_DFL);
-        signal(SIGQUIT, SIG_DFL);
 
         execvp(cmd->argv[0], cmd->argv);
         perror("Error al ejecutar comando");
@@ -147,8 +151,24 @@ void ejecutar_comando(command_t *cmd){
     }
     else{
         if(!cmd->background){ //foreground
+
+            pid_t shell_gpit = getpgrp();
+            pid_t child_gpid = pid;
+
+            sigset_t mask, old_mask;
+
+            sigemptyset(&mask);
+            sigaddset(&mask, SIGTSTP);
+            sigprocmask(SIG_BLOCK, &mask, &old_mask);
+
+            if(child_gpid != shell_gpit)
+            tcsetpgrp(STDERR_FILENO, child_gpid);
+
             int status;
-            waitpid(pid, &status, 0);
+            waitpid(pid, &status, WUNTRACED);
+
+            tcsetpgrp(STDIN_FILENO, shell_gpit);
+
             if (WIFEXITED(status)) {
                 set_last_exit_status(WEXITSTATUS(status));
             } else if (WIFSIGNALED(status)) {

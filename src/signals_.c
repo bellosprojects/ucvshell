@@ -41,16 +41,39 @@ void manejador_señales(int sig) {
 
 void configurar_señales(){
     struct sigaction sa;
+    
+    // Configurar SIGCHLD
     sa.sa_handler = manejador_señales;
-    /* Want to receive notifications for stop/continue as well, so DO NOT set SA_NOCLDSTOP */
     sa.sa_flags = SA_RESTART;
     sigemptyset(&sa.sa_mask);
     sigaction(SIGCHLD, &sa, NULL);
-
-    signal(SIGINT, SIG_IGN);  //ctrl c
-    signal(SIGTSTP, SIG_IGN);  //ctrl z
-    signal(SIGQUIT, SIG_IGN);  //ctrl \ //
-    /* Evitar que la shell sea detenida al tocar la terminal desde background */
-    signal(SIGTTOU, SIG_IGN); // ignore background write-to-tty
-    signal(SIGTTIN, SIG_IGN); // ignore background read-from-tty
+    
+    // Configurar SIGTSTP (Ctrl+Z) para IGNORAR en la shell
+    struct sigaction sa_tstp;
+    sa_tstp.sa_handler = SIG_IGN;  // Ignorar la señal
+    sa_tstp.sa_flags = 0;
+    sigemptyset(&sa_tstp.sa_mask);
+    sigaction(SIGTSTP, &sa_tstp, NULL);
+    
+    // Configurar SIGINT (Ctrl+C) para IGNORAR en la shell
+    struct sigaction sa_int;
+    sa_int.sa_handler = SIG_IGN;
+    sa_int.sa_flags = 0;
+    sigemptyset(&sa_int.sa_mask);
+    sigaction(SIGINT, &sa_int, NULL);
+    
+    // Configurar SIGQUIT (Ctrl+\) para IGNORAR
+    struct sigaction sa_quit;
+    sa_quit.sa_handler = SIG_IGN;
+    sa_quit.sa_flags = 0;
+    sigemptyset(&sa_quit.sa_mask);
+    sigaction(SIGQUIT, &sa_quit, NULL);
+    
+    // Configurar señales de terminal
+    struct sigaction sa_tty;
+    sa_tty.sa_handler = SIG_IGN;
+    sa_tty.sa_flags = 0;
+    sigemptyset(&sa_tty.sa_mask);
+    sigaction(SIGTTOU, &sa_tty, NULL);
+    sigaction(SIGTTIN, &sa_tty, NULL);
 }

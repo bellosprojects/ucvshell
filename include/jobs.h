@@ -24,6 +24,8 @@ int actualizar_status(Dequeue* jobs);
 int listar_jobs(Dequeue* jobs);
 void liberar_job(void* job);
 
+/// @brief Crea o devuelve si ya existe un apuntador a la tabla global de procesos usando SINGLETON
+/// @return Apuntador a la tabla de procesos
 Dequeue* obtener_jobs();
 
 #endif

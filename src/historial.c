@@ -12,7 +12,16 @@ typedef struct Historial {
     Nodo* cursor_actual;
 } Historial;
 
+Historial *historial_global = NULL;
+
 void cargar_historial(Dequeue* dq);
+
+Historial* obtener_historial() {
+    if (historial_global == NULL) {
+        historial_global = crear_historial();
+    }
+    return historial_global;
+}
 
 Historial* crear_historial() {
     Historial* historial = (Historial*)malloc(sizeof(Historial));
@@ -135,11 +144,14 @@ void* obtener_historial_posterior(Historial* historial) {
 
 void imprimir_historial(Historial* historial){
     if (!historial) return;
-    for(int i = getSize(historial->dq) -1; i >= 0; i--) {
-        linea* linea_dato= (linea*)getAt(historial->dq, i);
-        if (linea_dato) printf("%d %s\n", linea_dato->num, linea_dato->comando);
+    int size = getSize(historial->dq);
+    int numero = 1;
+    for(int i = size - 1; i >= 0; i--) {
+        linea* linea_dato = (linea*)getAt(historial->dq, i);
+        if (linea_dato) printf("%d %s\n", numero++, linea_dato->comando);
     }
 }
+
 
 void liberar_nodo_linea(void* dato) {
     if (dato == NULL) return;

@@ -10,6 +10,7 @@
 #include "signals_.h"
 #include "builtins.h"
 #include "jobs.h"
+#include "historial.h"
 
 void ejecutar_ast(ast_node_t *nodo);
 
@@ -81,11 +82,8 @@ void ejecutar_comando(command_t *cmd){
             set_last_exit_status(ejecutar_cd(cmd->argv));
         } else if(strcmp(cmd->argv[0], "pwd") == 0){
             set_last_exit_status(pwd());
-        } else if(strcmp(cmd->argv[0], "exit") == 0){
-           // cmd->argv[1] != NULL ? exit(atoi(cmd->argv[1])) : exit(0);
-
         } else if(strcmp(cmd->argv[0], "history") == 0){
-            fprintf(stderr, "Comando builtin no implementado\n");
+            imprimir_historial((Historial *)obtener_historial());
             set_last_exit_status(1);
         } else if(strcmp(cmd->argv[0], "help") == 0){
             //implementar help

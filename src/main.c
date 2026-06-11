@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 
     // - Manejo de señales
     
-    Historial* historial = crear_historial();
+    Historial* historial = obtener_historial();
     Dequeue* jobs = obtener_jobs();
     
     configurar_señales();

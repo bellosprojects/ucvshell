@@ -225,10 +225,7 @@ void shell_loop(Historial *historial){
                     guardar_historial(historial);
                     return;
                 }
-                if (strcmp(buffer_comando, "history") == 0) {
-                    imprimir_historial(historial);
-                    return;
-                }
+        
                 if (tamano_cadena > 0) {
                     agregar_historial(historial, buffer_comando);
                     procesar_linea(buffer_comando);

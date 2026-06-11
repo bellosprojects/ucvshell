@@ -14,6 +14,8 @@ typedef struct linea{
     char* comando;
 } linea;
 
+Historial* obtener_historial();
+
 /// @brief Crear un nuevo historial
 /// @return Apuntando al nuevo historial creado
 Historial* crear_historial();

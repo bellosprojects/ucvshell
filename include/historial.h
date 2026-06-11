@@ -40,14 +40,12 @@ void actualizar_valor(Historial* historial, char* nuevo_valor);
 void agregar_historial(Historial* historial, char* dato);
 
 //flecha hacia arriba
-
 /// @brief Obtiene el valor del comando anterior al actual del historial
 /// @param historial Apuntandor al historial
 /// @return Apuntador al payload del nodo anterior al actual del historial, o NULL si no existe
 void* obtener_historial_anterior(Historial* historial); 
 
 //flecha hacia abajo
-
 /// @brief Obtiene el valor del comando posterior al actual del historial
 /// @param historial Apuntandor al historial
 /// @return Apuntador al payload del nodo posterior al actual del historial, o NULL si no existe

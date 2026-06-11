@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <termios.h>
 #include "shell_loop.h"
-#include "path_utils.h"
 #include "trim.h"
 #include "command_utils.h"
 #include "ejecutar_ast.h"

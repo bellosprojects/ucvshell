@@ -30,7 +30,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 -include $(OBJ_DIR)/*.d
 
 clean:
-	@rm -rf $(OBJ_DIR) $(BIN_DIR)
+	@rm -rf $(OBJ_DIR)
 
 run: $(TARGET)
-	@./$(TARGET)
+	./bin/ucvsh

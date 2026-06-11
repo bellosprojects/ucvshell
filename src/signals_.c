@@ -36,7 +36,7 @@ void configurar_señales(){
     sa.sa_handler = manejador_señales;
     sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
     sigemptyset(&sa.sa_mask);
-    sigaction(SIGCHLD, &sa, NULL);
+    //sigaction(SIGCHLD, &sa, NULL);
 
     signal(SIGINT, SIG_IGN);  //ctrl c
     signal(SIGTSTP, SIG_IGN);  //ctrl z

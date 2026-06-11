@@ -1,9 +1,10 @@
-#include <stdlib.h>
+﻿#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
 #include <stdio.h>
 #include <signal.h>
+#include <errno.h>
 #include "signals_.h"
 #include "dequeue.h"
 #include "jobs.h"
@@ -125,24 +126,46 @@ void ejecutar_fg(char **args, Dequeue* jobs) {
     sigaddset(&mask, SIGCHLD);
     sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
-    // Reanudar el proceso
+    // Reanudar el proceso (grupo de procesos)
     if (kill(-pid_hijo, SIGCONT) < 0) {
         perror("fg: error al enviar SIGCONT");
         sigprocmask(SIG_SETMASK, &old_mask, NULL);
         return;
     }
 
-    // Ceder la terminal al hijo
-    tcsetpgrp(STDIN_FILENO, pid_hijo);
+    // Ceder la terminal al hijo — usar su process group
+    pid_t pgid = getpgid(pid_hijo);
+    if (pgid == -1) pgid = pid_hijo;
+    if (tcsetpgrp(STDIN_FILENO, pgid) == -1) {
+        perror("fg: tcsetpgrp");
+        // continuamos de todas formas
+    }
 
-    // Desbloquear SIGCHLD ANTES de esperar (para no perder señales)
+    // Desbloquear SIGCHLD para poder recibir la señal, pero manejar race con waitpid
     sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
     int status;
-    waitpid(pid_hijo, &status, WUNTRACED);
+    pid_t w;
+    do {
+        w = waitpid(pid_hijo, &status, WUNTRACED);
+    } while (w == -1 && errno == EINTR);
 
     // Recuperar la terminal para la shell — SIEMPRE, pase lo que pase
     tcsetpgrp(STDIN_FILENO, getpgrp());
+
+    if (w == -1) {
+        if (errno == ECHILD) {
+            // El manejador SIGCHLD ya repleó al hijo; consultar estado del job
+            if (job_actual->status == FINALIZADO) {
+                eliminar_job(jobs, pid_hijo);
+            } else if (job_actual->status == SUSPENDIDO) {
+                printf("\n[%d]+  Detenido\t%s\n", job_actual->id, job_actual->command);
+            }
+        } else {
+            perror("fg: waitpid");
+        }
+        return;
+    }
 
     if (WIFEXITED(status) || WIFSIGNALED(status)) {
         eliminar_job(jobs, pid_hijo);

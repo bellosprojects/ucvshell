@@ -41,7 +41,7 @@ int lecturaInmediata(){
     return ch;
 }
 
-TipoTecla procesarEntrada(int *caracter, Dequeue* jobs){
+TipoTecla procesarEntrada(int *caracter){
     int primer_caracter= lecturaInmediata();
     if(primer_caracter==27){
         int segundo_caracter= lecturaInmediata();
@@ -70,12 +70,12 @@ TipoTecla procesarEntrada(int *caracter, Dequeue* jobs){
     return TECLA_LETRA_NORMAL;
 }
 
-int procesar_linea(char *linea, Dequeue* jobs){
+int procesar_linea(char *linea){
 
     Dequeue *tokens = tokentizar(linea);
     ast_node_t *ast = crear_arbol_de_ejecucion(tokens);
 
-    ejecutar_ast(ast, jobs);
+    ejecutar_ast(ast);
     
     liberar_ast(ast);
 
@@ -85,7 +85,7 @@ int procesar_linea(char *linea, Dequeue* jobs){
     return 0;
 }
 
-void shell_loop(Historial *historial, Dequeue* jobs){
+void shell_loop(Historial *historial){
     
     int caracter_leido=0;
     char buffer_comando[256]= "";
@@ -104,7 +104,7 @@ void shell_loop(Historial *historial, Dequeue* jobs){
 
         if(is_exit) break;
 
-        TipoTecla tecla = procesarEntrada(&caracter_leido, jobs);
+        TipoTecla tecla = procesarEntrada(&caracter_leido);
 
         switch(tecla){
             case TECLA_ARRIBA: 
@@ -217,30 +217,24 @@ void shell_loop(Historial *historial, Dequeue* jobs){
                 break;
 
             case TECLA_ENTER:
-                buffer_comando[tamano_cadena]= '\0';
+                buffer_comando[tamano_cadena] = '\0';
                 trim(buffer_comando);
-
-                printf("\n"); 
-                if(!strcmp(buffer_comando, "exit")){
+                printf("\n");
+                if (!strcmp(buffer_comando, "exit")) {
                     guardar_historial(historial);
-                    return;  
-                } 
-                
-                if(strcmp(buffer_comando, "history") == 0){
-                    imprimir_historial(historial);
-                    //guardar_historial(historial);
                     return;
                 }
-
-                if (tamano_cadena > 0){
+        
+                if (tamano_cadena > 0) {
                     agregar_historial(historial, buffer_comando);
-
-                    procesar_linea(buffer_comando, jobs);
-
+                    procesar_linea(buffer_comando);
                 }
-                tamano_cadena=0;
-                posicion_cursor=0;
-                memset(buffer_comando, 0, sizeof(buffer_comando)); 
+                resetear_cursor(historial);  
+                editando_temporal = 1;        
+                tamano_cadena = 0;
+                posicion_cursor = 0;
+                memset(buffer_comando, 0, sizeof(buffer_comando));
+                memset(comando_temporal, 0, sizeof(comando_temporal));
                 printf("%s", PROMPT);
                 fflush(stdout);
                 break;

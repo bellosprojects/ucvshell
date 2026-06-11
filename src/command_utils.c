@@ -276,7 +276,7 @@ ast_node_t *crear_arbol_de_ejecucion(Dequeue *tokens){
 
     freedq(tokens, free_token);
     
-    print_ast(root);
+    //print_ast(root);
     
     return root;
 }
@@ -342,7 +342,7 @@ Dequeue *tokentizar(char *linea){
         if((is_end || i == strlen(linea) - 1) && token_position > 0) guardar(tokens, current_token, current_type, &token_position);
     }
 
-    print(tokens, print_token);
+    //print(tokens, print_token);
 
     return tokens;
 }

@@ -14,6 +14,8 @@ typedef struct linea{
     char* comando;
 } linea;
 
+Historial* obtener_historial();
+
 /// @brief Crear un nuevo historial
 /// @return Apuntando al nuevo historial creado
 Historial* crear_historial();
@@ -60,5 +62,9 @@ void imprimir_historial(Historial* historial);
 /// @param historial Apuntandor al historial
 /// @param freeFunc función personalizada para liberar el payload de cada nodo
 void liberar_historial(Historial* historial, void (*freeFunc)(void*));
+
+void liberar_nodo_linea(void* dato);
+
+void resetear_cursor(Historial* historial);
 
 #endif

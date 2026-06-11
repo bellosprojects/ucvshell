@@ -116,3 +116,23 @@ void liberar_job(void* node){
     free(job);
 }
 
+Job* obtener_ultimo_job(Dequeue* jobs) {
+    if (jobs == NULL || getSize(jobs) == 0) return NULL;
+    return (Job*)getAt(jobs, getSize(jobs) - 1);
+}
+
+Job* buscar_job_por_id(Dequeue* jobs, int id) {
+    for (int i = 0; i < getSize(jobs); i++) {
+        Job* job = (Job*)getAt(jobs, i);
+        if (job->id == id) return job;
+    }
+    return NULL;
+}
+
+Job* buscar_job_por_pid(Dequeue* jobs, int pid) {
+    for (int i = 0; i < getSize(jobs); i++) {
+        Job* job = (Job*)getAt(jobs, i);
+        if (job->pid == pid) return job;
+    }
+    return NULL;
+}

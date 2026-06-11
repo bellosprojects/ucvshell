@@ -93,6 +93,10 @@ void ejecutar_comando(command_t *cmd){
             //implementar jobs
             listar_jobs((Dequeue *)obtener_jobs());
             set_last_exit_status(1);
+        
+        } else if (strcmp(cmd->argv[0], "fg") == 0) {
+            ejecutar_fg(cmd->argv, obtener_jobs());
+            set_last_exit_status(0);
         } else {
             fprintf(stderr, "Comando builtin no implementado\n");
             set_last_exit_status(1);
@@ -108,6 +112,7 @@ void ejecutar_comando(command_t *cmd){
     }
 
     if(pid==0){
+        setpgid(0, 0);
         if(cmd->input_file){
             int fd= open(cmd->input_file, O_RDONLY);
             if(fd==-1){

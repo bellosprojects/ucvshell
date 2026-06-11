@@ -3,10 +3,14 @@
 #include <unistd.h>
 #include <limits.h>
 #include <stdio.h>
+#include <signal.h>
+#include "signals_.h"
+#include "dequeue.h"
+#include "jobs.h"
 #include "builtins.h"
 
 int is_builtin(const char* command) {
-    const char* builtins[] = {"cd", "pwd", "exit", "history", "help", "jobs", NULL};
+    const char* builtins[] = {"cd", "pwd", "exit", "history", "help", "jobs", "fg", NULL};
     for (int i = 0; builtins[i] != NULL; i++) {
         if (strcmp(command, builtins[i]) == 0) {
             return 1; 
@@ -84,5 +88,66 @@ int pwd() {
     } else {
         perror("ucvsh: pwd");
         return 1;
+    }
+}
+
+void ejecutar_fg(char **args, Dequeue* jobs) {
+    if (jobs == NULL || getSize(jobs) == 0) {
+        fprintf(stderr, "fg: no hay trabajos en segundo plano\n");
+        return;
+    }
+
+    Job* job_actual = NULL;
+
+    if (args[1] == NULL) {
+        job_actual = obtener_ultimo_job(jobs);
+    } else if (args[1][0] == '%') {
+        int job_id = atoi(&args[1][1]);
+        job_actual = buscar_job_por_id(jobs, job_id);
+    } else {
+        int pid_directo = atoi(args[1]);
+        job_actual = buscar_job_por_pid(jobs, pid_directo);
+    }
+
+    if (job_actual == NULL) {
+        fprintf(stderr, "fg: trabajo no encontrado: %s\n",
+                args[1] ? args[1] : "actual");
+        return;
+    }
+
+    pid_t pid_hijo = job_actual->pid;
+    printf("%s\n", job_actual->command);
+    fflush(stdout);
+
+    // Bloquear SIGCHLD para que el manejador no coseche este proceso
+    sigset_t mask, old_mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &mask, &old_mask);
+
+    // Reanudar el proceso
+    if (kill(-pid_hijo, SIGCONT) < 0) {
+        perror("fg: error al enviar SIGCONT");
+        sigprocmask(SIG_SETMASK, &old_mask, NULL);
+        return;
+    }
+
+    // Ceder la terminal al hijo
+    tcsetpgrp(STDIN_FILENO, pid_hijo);
+
+    // Desbloquear SIGCHLD ANTES de esperar (para no perder señales)
+    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+
+    int status;
+    waitpid(pid_hijo, &status, WUNTRACED);
+
+    // Recuperar la terminal para la shell — SIEMPRE, pase lo que pase
+    tcsetpgrp(STDIN_FILENO, getpgrp());
+
+    if (WIFEXITED(status) || WIFSIGNALED(status)) {
+        eliminar_job(jobs, pid_hijo);
+    } else if (WIFSTOPPED(status)) {
+        job_actual->status = SUSPENDIDO;
+        printf("\n[%d]+  Detenido\t%s\n", job_actual->id, job_actual->command);
     }
 }

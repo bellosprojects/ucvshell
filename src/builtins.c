@@ -159,7 +159,7 @@ void ejecutar_fg(char **args, Dequeue* jobs) {
             if (job_actual->status == FINALIZADO) {
                 eliminar_job(jobs, pid_hijo);
             } else if (job_actual->status == SUSPENDIDO) {
-                printf("\n[%d]+  Detenido\t%s\n", job_actual->id, job_actual->command);
+                printf("\n[%d]+  Stopped\t%s\n", job_actual->id, job_actual->command);
             }
         } else {
             perror("fg: waitpid");
@@ -171,6 +171,6 @@ void ejecutar_fg(char **args, Dequeue* jobs) {
         eliminar_job(jobs, pid_hijo);
     } else if (WIFSTOPPED(status)) {
         job_actual->status = SUSPENDIDO;
-        printf("\n[%d]+  Detenido\t%s\n", job_actual->id, job_actual->command);
+        printf("\n[%d]+  Stopped\t%s\n", job_actual->id, job_actual->command);
     }
 }

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <stdio.h>
+#include "dequeue.h"
 
 #ifndef BUILTINS_H
 #define BUILTINS_H

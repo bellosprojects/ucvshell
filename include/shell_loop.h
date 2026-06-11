@@ -22,14 +22,12 @@ int lecturaInmediata();
 
 /// @brief Funcion encargada de procesar la entrada del usuario y determinar el tipo de tecla presionada
 /// @param caracter Puntero al caracter ingresado en la terminal
-/// @param jobs Lista donde se almacenan los procesos foreground
 /// @return El tipo de tecla presionada
-TipoTecla procesarEntrada(int *caracter, Dequeue* jobs);
+TipoTecla procesarEntrada(int *caracter);
 
 
 /// @brief Loop de ucvsh que se encarga de manejar los distintos tipos de tecla ingresados y ejecutar sus acciones respectivas
 /// @param historial Lista donde se almacenan los comandos ingresados
-/// @param jobs Lista donde se almacenan los procesos foreground
-void shell_loop(Historial *historial, Dequeue* jobs);
+void shell_loop(Historial *historial);
 
 #endif

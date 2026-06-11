@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
     
     configurar_señales();
     
-    shell_loop(historial, jobs);
+    shell_loop(historial);
     liberar_historial(historial, liberar_nodo_linea);
     freedq(jobs, liberar_job);
 

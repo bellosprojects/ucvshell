@@ -218,30 +218,27 @@ void shell_loop(Historial *historial){
                 break;
 
             case TECLA_ENTER:
-                buffer_comando[tamano_cadena]= '\0';
+                buffer_comando[tamano_cadena] = '\0';
                 trim(buffer_comando);
-
-                printf("\n"); 
-                if(!strcmp(buffer_comando, "exit")){
+                printf("\n");
+                if (!strcmp(buffer_comando, "exit")) {
                     guardar_historial(historial);
-                    return;  
-                }
-                
-                if(strcmp(buffer_comando, "history") == 0){
-                    imprimir_historial(historial);
-                    //guardar_historial(historial);
                     return;
                 }
-
-                if (tamano_cadena > 0){
-                    agregar_historial(historial, buffer_comando);
-
-                    procesar_linea(buffer_comando);
-
+                if (strcmp(buffer_comando, "history") == 0) {
+                    imprimir_historial(historial);
+                    return;
                 }
-                tamano_cadena=0;
-                posicion_cursor=0;
-                memset(buffer_comando, 0, sizeof(buffer_comando)); 
+                if (tamano_cadena > 0) {
+                    agregar_historial(historial, buffer_comando);
+                    procesar_linea(buffer_comando);
+                }
+                resetear_cursor(historial);  
+                editando_temporal = 1;        
+                tamano_cadena = 0;
+                posicion_cursor = 0;
+                memset(buffer_comando, 0, sizeof(buffer_comando));
+                memset(comando_temporal, 0, sizeof(comando_temporal));
                 printf("%s", PROMPT);
                 fflush(stdout);
                 break;

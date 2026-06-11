@@ -149,3 +149,8 @@ void liberar_nodo_linea(void* dato) {
     }
     free(l);
 }
+
+void resetear_cursor(Historial* historial) {
+    if (!historial) return;
+    historial->cursor_actual = NULL;
+}

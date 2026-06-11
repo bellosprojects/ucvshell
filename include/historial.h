@@ -63,4 +63,6 @@ void liberar_historial(Historial* historial, void (*freeFunc)(void*));
 
 void liberar_nodo_linea(void* dato);
 
+void resetear_cursor(Historial* historial);
+
 #endif

@@ -48,32 +48,22 @@ void configurar_señales(){
     sigemptyset(&sa.sa_mask);
     sigaction(SIGCHLD, &sa, NULL);
     
-    // Configurar SIGTSTP (Ctrl+Z) para IGNORAR en la shell
-    struct sigaction sa_tstp;
-    sa_tstp.sa_handler = SIG_IGN;  // Ignorar la señal
-    sa_tstp.sa_flags = 0;
-    sigemptyset(&sa_tstp.sa_mask);
-    sigaction(SIGTSTP, &sa_tstp, NULL);
+    // ESTRUCTURA PARA IGNORAR SEÑALES EN EL PROMPT DE FORMA SEGURA
+    struct sigaction sa_ign;
+    sa_ign.sa_handler = SIG_IGN;
+    sa_ign.sa_flags = SA_RESTART; // <-- CRÍTICO: Evita que el prompt se rompa al presionar las teclas
+    sigemptyset(&sa_ign.sa_mask);
+
+    // Configurar SIGTSTP (Ctrl+Z) para IGNORAR de verdad de forma segura
+    sigaction(SIGTSTP, &sa_ign, NULL);
     
-    // Configurar SIGINT (Ctrl+C) para IGNORAR en la shell
-    struct sigaction sa_int;
-    sa_int.sa_handler = SIG_IGN;
-    sa_int.sa_flags = 0;
-    sigemptyset(&sa_int.sa_mask);
-    sigaction(SIGINT, &sa_int, NULL);
+    // Configurar SIGINT (Ctrl+C) para IGNORAR de forma segura
+    sigaction(SIGINT, &sa_ign, NULL);
     
-    // Configurar SIGQUIT (Ctrl+\) para IGNORAR
-    struct sigaction sa_quit;
-    sa_quit.sa_handler = SIG_IGN;
-    sa_quit.sa_flags = 0;
-    sigemptyset(&sa_quit.sa_mask);
-    sigaction(SIGQUIT, &sa_quit, NULL);
+    // Configurar SIGQUIT (Ctrl+\) para IGNORAR de forma segura
+    sigaction(SIGQUIT, &sa_ign, NULL);
     
     // Configurar señales de terminal
-    struct sigaction sa_tty;
-    sa_tty.sa_handler = SIG_IGN;
-    sa_tty.sa_flags = 0;
-    sigemptyset(&sa_tty.sa_mask);
-    sigaction(SIGTTOU, &sa_tty, NULL);
-    sigaction(SIGTTIN, &sa_tty, NULL);
+    sigaction(SIGTTOU, &sa_ign, NULL);
+    sigaction(SIGTTIN, &sa_ign, NULL);
 }

@@ -36,4 +36,12 @@ int pwd();
  */
 void ejecutar_fg(char **args, Dequeue* jobs);
 
+
+/**
+ * @brief Ejecuta el comando builtin 'help' para mostrar información sobre los comandos internos
+ * @param argv Argumentos del comando, donde argv[0] es "help" y argv[1] es opcional para especificar un comando
+ * @return 0 si se ejecutó correctamente, 1 en caso de error
+ */
+int ejecutar_help(char **argv);
+
 #endif

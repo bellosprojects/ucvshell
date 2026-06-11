@@ -86,11 +86,8 @@ void ejecutar_comando(command_t *cmd){
             imprimir_historial((Historial *)obtener_historial());
             set_last_exit_status(1);
         } else if(strcmp(cmd->argv[0], "help") == 0){
-            //implementar help
-            fprintf(stderr, "this is the help command \n");
-            set_last_exit_status(1);
+            set_last_exit_status(ejecutar_help(cmd->argv));
         } else if(strcmp(cmd->argv[0], "jobs") == 0){
-            //implementar jobs
             listar_jobs((Dequeue *)obtener_jobs());
             set_last_exit_status(1);
         
@@ -114,11 +111,18 @@ void ejecutar_comando(command_t *cmd){
     if(pid==0){
 
         setpgid(0, 0);
+
+        sigset_t clear_mask;
+        sigemptyset(&clear_mask);
+        sigprocmask(SIG_SETMASK, &clear_mask, NULL);
+
         signal(SIGINT, SIG_DFL);
-        signal(SIGTSTP, SIG_DFL);
+        //signal(SIGTSTP, SIG_DFL);
         signal(SIGQUIT, SIG_DFL);
         signal(SIGTTOU, SIG_DFL);
         signal(SIGTTIN, SIG_DFL);
+
+        signal(SIGTSTP, (void (*)(int))exit);
 
         if(cmd->input_file){
             int fd= open(cmd->input_file, O_RDONLY);
@@ -162,12 +166,16 @@ void ejecutar_comando(command_t *cmd){
             sigprocmask(SIG_BLOCK, &mask, &old_mask);
 
             if(child_gpid != shell_gpit)
-            tcsetpgrp(STDERR_FILENO, child_gpid);
+                tcsetpgrp(STDERR_FILENO, child_gpid);
 
             int status;
             waitpid(pid, &status, WUNTRACED);
 
+            signal(SIGTTOU, SIG_IGN);
             tcsetpgrp(STDIN_FILENO, shell_gpit);
+            signal(SIGTTOU, SIG_DFL);
+
+            sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
             if (WIFEXITED(status)) {
                 set_last_exit_status(WEXITSTATUS(status));
@@ -209,19 +217,3 @@ void ejecutar_ast(ast_node_t *nodo){
             fprintf(stderr, "Tipo de nodo desconocido\n");
     }
 }
-
-//SEÑALES
-//JOBLIST
-
-
-/*if (cmd->background) {
-    pid_t pid = fork();
-    if (pid == 0) {
-        // ... hijo: redirige stdin a /dev/null y ejecuta ...
-    } else {
-        // ... padre: NO hace waitpid. 
-        // Agrega el job a la lista:
-        agregar_job(pid, cmd->name);
-        printf("[%d] %d\n", num_job, pid); // Típico formato de shell
-    }
-}*/

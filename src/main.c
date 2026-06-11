@@ -15,10 +15,6 @@ void liberar_nodo_linea(void* dato) {
 }
 
 int main(int argc, char *argv[]){
-
-    // - Manejo de señales
-    
-    // Por hacer
     
     Historial* historial = crear_historial();
     Dequeue* jobs = obtener_jobs();
@@ -26,9 +22,8 @@ int main(int argc, char *argv[]){
     configurar_señales();
     
     shell_loop(historial, jobs);
+    
     liberar_historial(historial, liberar_nodo_linea);
-
-    // Por hacer
     freedq(jobs, liberar_job);
 
     return 0;

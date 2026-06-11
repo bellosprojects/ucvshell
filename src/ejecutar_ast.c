@@ -86,11 +86,8 @@ void ejecutar_comando(command_t *cmd){
             imprimir_historial((Historial *)obtener_historial());
             set_last_exit_status(1);
         } else if(strcmp(cmd->argv[0], "help") == 0){
-            //implementar help
-            fprintf(stderr, "this is the help command \n");
-            set_last_exit_status(1);
+            set_last_exit_status(ejecutar_help(cmd->argv));
         } else if(strcmp(cmd->argv[0], "jobs") == 0){
-            //implementar jobs
             listar_jobs((Dequeue *)obtener_jobs());
             set_last_exit_status(1);
         
@@ -220,4 +217,3 @@ void ejecutar_ast(ast_node_t *nodo){
             fprintf(stderr, "Tipo de nodo desconocido\n");
     }
 }
-

@@ -9,6 +9,54 @@
 #include "dequeue.h"
 #include "jobs.h"
 #include "builtins.h"
+#define NUM_BUILTINS (sizeof(tabla_ayuda) / sizeof(HelpCommand))
+
+typedef struct {
+    const char *nombre;
+    const char *descripcion;
+    const char *sintaxis;
+} HelpCommand;
+
+// comandos builtins implementados
+static HelpCommand tabla_ayuda[] = {
+    {"cd",      "Cambia el directorio actual de trabajo de la shell.", "cd [directorio]"},
+    {"pwd",     "Imprime la ruta absoluta del directorio de trabajo actual.", "pwd"},
+    {"history", "Muestra la lista de los comandos ejecutados recientemente.", "history"},
+    {"jobs",    "Lista todos los trabajos (jobs) activos en segundo plano (background).", "jobs"},
+    {"fg",      "Trae un trabajo en segundo plano al primer plano (foreground).", "fg <job_id>"},
+    {"help",    "Muestra información sobre los comandos internos de la shell.", "help [comando]"}
+};
+
+int ejecutar_help(char **argv) {
+    // "help sin más argumentos"
+    if (argv[1] == NULL) {
+        printf("\n--- ucvshell, version 1.0.0 ---\n");
+        printf("Estos comandos de shell son definidos internamente.\n");
+        printf("Escribe 'help <comando>' para ver los detalles de un comando especifico.\n\n");
+        printf("%-12s %s\n", "Comando", "Descripcion");
+        printf("-----------------------------------------------------------------\n");
+        
+        for (size_t i = 0; i < NUM_BUILTINS; i++) {
+            printf("%-12s %s\n", tabla_ayuda[i].nombre, tabla_ayuda[i].descripcion);
+        }
+        printf("\n");
+        return 0;
+    }
+
+    // "help [comando]"
+    for (size_t i = 0; i < NUM_BUILTINS; i++) {
+        if (strcmp(argv[1], tabla_ayuda[i].nombre) == 0) {
+            printf("\nComando:       %s\n", tabla_ayuda[i].nombre);
+            printf("Descripcion:   %s\n", tabla_ayuda[i].descripcion);
+            printf("Uso:           %s\n", tabla_ayuda[i].sintaxis);
+            return 0;
+        }
+    }
+
+    // comando no existe en los builtins
+    fprintf(stderr, "help: No es un builtin '%s'. Intenta con otro comando.\n", argv[1]);
+    return 1;
+}
 
 int is_builtin(const char* command) {
     const char* builtins[] = {"cd", "pwd", "exit", "history", "help", "jobs", "fg", NULL};

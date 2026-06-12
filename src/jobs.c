@@ -18,10 +18,10 @@ Dequeue* obtener_jobs(){
 
 int agregar_job(Dequeue* jobs, const char* command, int pid, Status status){
     Job* new_job = (Job*)malloc(sizeof(Job));
-    if (!new_job) return -1; // Error de memoria
+    if (!new_job) return -1;
     
     new_job->id = getSize(jobs) +1;
-    new_job->command = (char*)strdup(command); // Duplicar el comando para evitar problemas de
+    new_job->command = (char*)strdup(command);
     new_job->pid = pid;
     new_job->status = status;
     new_job->mostrado = 0;
@@ -38,7 +38,7 @@ int eliminar_job(Dequeue* jobs, int pid){
         if (job->pid == pid) {
             Job* aux = removeAt(jobs, i);
             liberar_job(aux);
-            return 0; // Éxito
+            return 0;
         }
     }
     return 1;
@@ -53,14 +53,13 @@ int actualizar_status(Dequeue* jobs) {
         if (result > 0) {
             if (WIFEXITED(status) || WIFSIGNALED(status)) {
                 job->status = FINALIZADO;
-                job->mostrado = 0;   // Recién terminado, aún no mostrado
+                job->mostrado = 0;
             } else if (WIFSTOPPED(status)) {
                 job->status = SUSPENDIDO;
             } else if (WIFCONTINUED(status)) {
                 job->status = EJECUTANDO;
             }
         } else if (result == -1) {
-            // El proceso ya no existe
             job->status = FINALIZADO;
             job->mostrado = 0;
         }
@@ -79,27 +78,25 @@ void printJobs(void* dato) {
     }
     printf("[%d]  %d %-20s %s\n", job->id, job->pid, state_str, job->command);
     
-    // Marcar como mostrado si es FINALIZADO
     if (job->status == FINALIZADO) {
         job->mostrado = 1;
     }
 }
 
 int listar_jobs(Dequeue* jobs) {
-    actualizar_status(jobs);   // 1. Actualiza estados (sin eliminar)
+    actualizar_status(jobs);
     
     if (getSize(jobs) == 0) {
         return 0;
     }
     
-    print(jobs, printJobs);    // 2. Imprime y marca los finalizados como 'mostrados = 1'
+    print(jobs, printJobs); 
     
-    // 3. Recorrer en REVERSA para eliminar de forma segura
     for (int i = getSize(jobs) - 1; i >= 0; i--) {
         Job* job = (Job*)getAt(jobs, i);
         
         if (job->status == FINALIZADO && job->mostrado) {
-            // Removemos directamente por índice en lugar de buscar por PID
+
             Job* aux = removeAt(jobs, i); 
             liberar_job(aux); 
         }

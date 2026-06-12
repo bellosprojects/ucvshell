@@ -9,8 +9,9 @@
 
 
 /// @brief Funcion encargada de manejar las señales para que no afecten a la terminal sino a los procesos ejecutados en esta
-void manejador_señales(int sig);
+void manejador_senales(int sig);
+
 /// @brief Funcion encargada de configurar las señales para que se manejen correctamente
-void configurar_señales();
+void configurar_senales();
 
 #endif

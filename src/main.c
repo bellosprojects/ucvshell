@@ -7,12 +7,21 @@
 
 int main(int argc, char *argv[]){
 
-    // - Manejo de señales
+    /**
+     *  Archivo de entrada a UCV Shell
+     *  Inicializacion del Historial y la tabla de Jobs
+     *  Configuracion de las señales
+     */
     
     Historial* historial = obtener_historial();
     Dequeue* jobs = obtener_jobs();
     
-    configurar_señales();
+    configurar_senales();
+
+    /**
+     *  Invocacion al loop de shell que coloca la terminal en modo no cononico
+     *  Al finalizar libera las tablas previamente declaradas
+     */
     
     shell_loop(historial);
     liberar_historial(historial, liberar_nodo_linea);

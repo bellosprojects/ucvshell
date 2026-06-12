@@ -124,8 +124,6 @@ int getSize(Dequeue* dq){
     return dq->size;
 }
 
-//-----------------------------------------------------------
-
 
 
 void print(Dequeue* dq, void (*printFunc)(void*)){

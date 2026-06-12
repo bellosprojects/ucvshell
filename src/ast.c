@@ -18,7 +18,6 @@ command_t *crear_comando(char **argv, char *input, char* output, int append, int
 }
 
 ast_node_t* crear_nodo_comando(command_t *comando){
-
     
     ast_node_t* nodo = (ast_node_t*)malloc(sizeof(ast_node_t));
     

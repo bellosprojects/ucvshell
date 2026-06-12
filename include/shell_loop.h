@@ -3,6 +3,7 @@
 #ifndef SHELL_LOOP_H
 #define SHELL_LOOP_H
 
+/// @brief Tipo de tecla recibida en la entrada
 typedef enum {
     TECLA_LETRA_NORMAL,
     TECLA_ARRIBA,

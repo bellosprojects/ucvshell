@@ -9,72 +9,6 @@ void free_token(void *token){
     liberar_token((token_t*)token);
 }
 
-void mostrar_ast_recursivo(ast_node_t *nodo, int nivel) {
-    if (nodo == NULL) return;
-    
-    // Crear la sangría según el nivel actual
-    for (int i = 0; i < nivel; i++) {
-        printf("    │"); // Identificador visual de jerarquía
-    }
-    printf("-- ");
-
-    // 1. Si es un nodo de comando (Hoja del árbol) 
-    if (nodo->type == NODE_COMMAND) {
-        command_t *cmd = nodo->data.cmd;
-
-        if (cmd && cmd->argv && cmd->argv[0]) { 
-            // Imprimir el comando principal y sus argumentos
-            printf("[CMD] %s", cmd->argv[0]);  
-            
-            int j = 1;
-            while (cmd->argv[j] != NULL) { 
-                printf(" '%s'", cmd->argv[j]); 
-                j++;
-            }
-
-            // Mostrar si tiene redirecciones asociadas 
-            if (cmd->input_file) { 
-                printf(" < (%s)", cmd->input_file); 
-            }
-            if (cmd->output_file) { 
-                if (cmd->append_output) printf(" >> (%s)", cmd->output_file); 
-                else printf(" > (%s)", cmd->output_file); 
-            }
-            if (cmd->background) { 
-                printf(" & [BG]"); 
-            }
-            printf("\n");
-        } else {
-            printf("[CMD] Vacío o inválido\n");
-        }
-        return; // Fin de la rama
-    }
-
-    // 2. Si es un nodo operador (Conector binario) 
-    switch (nodo->type) { 
-        case NODE_PIPE:      printf("[OPERADOR] PIPE (|)\n"); break; 
-        case NODE_AND:       printf("[OPERADOR] AND (&&)\n"); break; 
-        case NODE_OR:        printf("[OPERADOR] OR (||)\n"); break; 
-        case NODE_SEMICOLON: printf("[OPERADOR] SEMICOLON (;)\n"); break; 
-        default:             printf("[OPERADOR] DESCONOCIDO\n"); break; 
-    }
-
-    // Llamadas recursivas: Primero el hijo izquierdo, luego el derecho 
-    mostrar_ast_recursivo(nodo->data.op.left, nivel + 1); 
-    mostrar_ast_recursivo(nodo->data.op.right, nivel + 1); 
-}
-
-// Función principal pública que invocarás desde tu main.c
-void print_ast(ast_node_t *node) {
-    printf("\n========= ESTRUCTURA DEL AST =========\n");
-    if (node == NULL) {
-        printf("( - Árbol vacío - )\n");
-    } else {
-        mostrar_ast_recursivo(node, 0);
-    }
-    printf("======================================\n\n");
-}
-
 node_type_t obtener_tipo(Dequeue *tokens){
 
     char *tipo = ((token_t*)getAt(tokens, 0))->value;
@@ -127,6 +61,7 @@ ast_node_t *parsear_comando(Dequeue *tokens){
 
                 if(getSize(tokens) == 0){
                     // Error [Se esperaba descriptor]
+                    perror("Se esperaba un descriptor");
                     break;
                 }
 
@@ -185,12 +120,14 @@ ast_node_t *pasear_parentesis(Dequeue *tokens){
 
         if(getSize(tokens) == 0){
             // Error [Falta parentesis de cierre]
+            perror("Se esperaba parentesis de cierre");
         }
 
         token_t *token_cierre = (token_t*)getAt(tokens, 0);
 
         if(token_cierre->type != 1 || strcmp(token_cierre->value, ")") != 0){
             // Error [Falta parentesis de cierre]
+            perror("Se esperaba parentesis de cierre");
         }
 
         liberar_token((token_t*)pop_front(tokens));
@@ -275,15 +212,8 @@ ast_node_t *crear_arbol_de_ejecucion(Dequeue *tokens){
     ast_node_t *root = parsear_secuencia(tokens);
 
     freedq(tokens, free_token);
-    
-    //print_ast(root);
-    
+        
     return root;
-}
-
-void print_token(void* token){
-    token_t t = *((token_t*)token);
-    printf("[Token tipo %d]: %s\n", t.type, t.value);
 }
 
 void guardar(Dequeue* tokens, char *current_token, int type, int *n){
@@ -341,8 +271,6 @@ Dequeue *tokentizar(char *linea){
         
         if((is_end || i == strlen(linea) - 1) && token_position > 0) guardar(tokens, current_token, current_type, &token_position);
     }
-
-    //print(tokens, print_token);
 
     return tokens;
 }

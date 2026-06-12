@@ -10,11 +10,6 @@
 
 #define PROMPT "ucvsh> "
 
-/*
-Recibo la lista y el tamaño, si se presiona la flecha de arriba o la de abajo tengo que restar y sumar respectivamente verificando los limites
-para detecto la tecla, borro la linea, imprimo el prompt y luego coloco el ultimo comando de la lista
-*/
-
 int lecturaInmediata(){
     struct termios viejo, nuevo;
     int ch;
@@ -143,7 +138,6 @@ void shell_loop(Historial *historial){
                     tamano_cadena = strlen(buffer_comando);
                     
                 } else {
-                    //Es el finalll
 
                     printf("\r\033[K");
                     printf("%s%s", PROMPT, comando_temporal);

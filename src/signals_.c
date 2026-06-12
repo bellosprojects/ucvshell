@@ -56,7 +56,6 @@ void configurar_senales(){
     
     sigaction(SIGQUIT, &sa_ign, NULL);
     
-    // Configurar señales de terminal
     sigaction(SIGTTOU, &sa_ign, NULL);
     sigaction(SIGTTIN, &sa_ign, NULL);
 }

@@ -15,15 +15,12 @@ typedef struct Historial {
 Historial *historial_global = NULL;
 
 void obtener_ruta_historial(char* buffer, size_t max_len) {
-    // Si ya fue calculada previamente, no la volvemos a calcular
     if (strlen(buffer) > 0) return;
 
     char* home = getenv("HOME");
     if (home != NULL) {
-        // Construye la ruta: /home/usuario/.ucvsh_history
         snprintf(buffer, max_len, "%s/%s", home, ".ucvsh_history");
     } else {
-        // Plan de respaldo si HOME no está definido
         snprintf(buffer, max_len, "%s", ".ucvsh_history");
     }
 }
@@ -104,7 +101,6 @@ void guardar_historial(Historial* historial) {
 
     obtener_ruta_historial(ruta_historial, sizeof(ruta_historial));
 
-    // Usamos "w" para sobrescribir con el estado actual de la lista
     FILE* file = fopen(ruta_historial , "w");
     if (file == NULL) {
         perror("Error al guardar historial");

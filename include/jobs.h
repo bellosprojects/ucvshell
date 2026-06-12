@@ -58,8 +58,33 @@ int listar_jobs(Dequeue* jobs);
  */
 void liberar_job(void* job);
 
-/// @brief Crea o devuelve si ya existe un apuntador a la tabla global de procesos usando SINGLETON
-/// @return Apuntador a la tabla de procesos
+/**
+ * @brief Obtiene el último trabajo agregado a la lista de trabajos en segundo plano
+ * @param jobs La lista de trabajos
+ * @return Un puntero al trabajo encontrado, o NULL si no se encontró
+ */
+Job* obtener_ultimo_job(Dequeue* jobs);
+
+/**
+ * @brief Busca un trabajo en la lista de trabajos en segundo plano dado su ID
+ * @param jobs La lista de trabajos
+ * @param id El ID del trabajo a buscar
+ * @return Un puntero al trabajo encontrado, o NULL si no se encontró
+ */
+Job* buscar_job_por_id(Dequeue* jobs, int id);
+
+/**
+ * @brief Busca un trabajo en la lista de trabajos en segundo plano dado su PID
+ * @param jobs La lista de trabajos
+ * @param pid El PID del proceso asociado al trabajo a buscar
+ * @return Un puntero al trabajo encontrado, o NULL si no se encontró
+ */
+Job* buscar_job_por_pid(Dequeue* jobs, int pid);
+
+/**
+ * @brief Obtiene la lista global de trabajos en segundo plano (singleton), creando una nueva si no existe
+ * @return Un puntero a la lista de trabajos
+ */
 Dequeue* obtener_jobs();
 
 #endif

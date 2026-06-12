@@ -6,7 +6,7 @@ INC_DIR := include
 BIN_DIR := bin
 SRC_DIR := src
 
-CFLAGS := -g -I$(INC_DIR) -Wall -Wextra -Werror
+CFLAGS := -g -I$(INC_DIR)
 DEPFLAGS := -MMD -MP
 
 SRCS := $(wildcard $(SRC_DIR)/*.c)

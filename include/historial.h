@@ -21,7 +21,7 @@ Historial* obtener_historial();
 /// @return Apuntador al nuevo historial creado
 Historial* crear_historial();
 
-/// @brief 
+/// @brief Guarda el historial en un archivo
 /// @param historial 
 void guardar_historial(Historial* historial);
 

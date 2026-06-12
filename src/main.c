@@ -16,8 +16,6 @@ int main(int argc, char *argv[]){
     
     shell_loop(historial);
     liberar_historial(historial, liberar_nodo_linea);
-
-    // Por hacer
     freedq(jobs, liberar_job);
 
     return 0;

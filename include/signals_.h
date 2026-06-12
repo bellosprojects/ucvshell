@@ -7,7 +7,10 @@
 #include <errno.h>
 #include <stdio.h>
 
+
+/// @brief Funcion encargada de manejar las señales para que no afecten a la terminal sino a los procesos ejecutados en esta
 void manejador_señales(int sig);
+/// @brief Funcion encargada de configurar las señales para que se manejen correctamente
 void configurar_señales();
 
 #endif

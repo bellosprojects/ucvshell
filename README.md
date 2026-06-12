@@ -11,5 +11,18 @@
 
 ```bash
 make
+```
+
+## Advertencia
+
+Para el correcto manejo de las señales, es importar ejecutar el codigo manualmente con el comando
+
+```bash
+./bin/ucvsh
+```
+
+Y no con
+
+```bash
 make run
 ```

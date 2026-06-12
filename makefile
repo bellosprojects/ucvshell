@@ -31,6 +31,3 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 clean:
 	@rm -rf $(OBJ_DIR)
-
-run: $(TARGET)
-	./bin/ucvsh
